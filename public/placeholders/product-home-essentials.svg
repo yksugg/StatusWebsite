@@ -1,0 +1,9 @@
+<!-- Placeholder product image. Replace with supplied range photography. -->
+<svg width="640" height="640" viewBox="0 0 640 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="640" height="640" rx="28" fill="#F8FBFC"/>
+  <path d="M132 304l188-154 188 154v168c0 22-18 40-40 40H172c-22 0-40-18-40-40V304z" fill="#FFFFFF" stroke="#004B66" stroke-width="16" stroke-linejoin="round"/>
+  <rect x="260" y="350" width="120" height="162" rx="18" fill="#E9F6FA" stroke="#008BB1" stroke-width="12"/>
+  <circle cx="344" cy="430" r="10" fill="#F3B23C"/>
+  <path d="M228 304h68M344 304h68" stroke="#00B3E3" stroke-width="18" stroke-linecap="round"/>
+  <text x="320" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#004B66">Home Essentials</text>
+</svg>

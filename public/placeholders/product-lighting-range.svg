@@ -1,0 +1,11 @@
+<!-- Placeholder range image. Replace with supplied category photography. -->
+<svg width="640" height="640" viewBox="0 0 640 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="640" height="640" rx="28" fill="#E9F6FA"/>
+  <path d="M184 106v98M320 86v118M456 106v98" stroke="#004B66" stroke-width="14" stroke-linecap="round"/>
+  <ellipse cx="184" cy="252" rx="62" ry="48" fill="#F3B23C" opacity=".8"/>
+  <ellipse cx="320" cy="252" rx="74" ry="58" fill="#00B3E3" opacity=".62"/>
+  <ellipse cx="456" cy="252" rx="62" ry="48" fill="#F3B23C" opacity=".8"/>
+  <path d="M122 252c0-29 28-52 62-52s62 23 62 52M246 252c0-37 33-66 74-66s74 29 74 66M394 252c0-29 28-52 62-52s62 23 62 52" stroke="#004B66" stroke-width="14"/>
+  <rect x="148" y="390" width="344" height="80" rx="22" fill="#FFFFFF" stroke="#008BB1" stroke-width="14"/>
+  <text x="320" y="574" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#004B66">Lighting Range</text>
+</svg>
