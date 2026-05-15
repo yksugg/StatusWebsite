@@ -1,0 +1,11 @@
+<!-- Placeholder product image. Replace with supplied SKU photography. -->
+<svg width="640" height="640" viewBox="0 0 640 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="640" height="640" rx="28" fill="#F4F7F9"/>
+  <rect x="202" y="144" width="88" height="310" rx="22" fill="#FFFFFF" stroke="#004B66" stroke-width="14"/>
+  <rect x="350" y="144" width="88" height="310" rx="22" fill="#FFFFFF" stroke="#004B66" stroke-width="14"/>
+  <rect x="226" y="112" width="40" height="32" rx="8" fill="#004B66"/>
+  <rect x="374" y="112" width="40" height="32" rx="8" fill="#004B66"/>
+  <path d="M202 260h88M350 260h88" stroke="#00B3E3" stroke-width="36"/>
+  <path d="M236 360h20M384 360h20M394 350v20" stroke="#F3B23C" stroke-width="12" stroke-linecap="round"/>
+  <text x="320" y="574" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#004B66">Batteries</text>
+</svg>

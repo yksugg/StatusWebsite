@@ -1,0 +1,13 @@
+<!-- Placeholder product image. Replace with supplied SKU photography. -->
+<svg width="640" height="640" viewBox="0 0 640 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="640" height="640" rx="28" fill="#E9F6FA"/>
+  <path d="M100 258c96-90 186 96 286 0s142 44 154 82" stroke="#004B66" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="144" cy="230" r="28" fill="#F3B23C"/>
+  <circle cx="230" cy="286" r="28" fill="#00B3E3"/>
+  <circle cx="326" cy="298" r="28" fill="#F3B23C"/>
+  <circle cx="416" cy="244" r="28" fill="#00B3E3"/>
+  <circle cx="508" cy="286" r="28" fill="#F3B23C"/>
+  <rect x="210" y="390" width="220" height="70" rx="22" fill="#FFFFFF" stroke="#008BB1" stroke-width="14"/>
+  <path d="M246 425h148" stroke="#004B66" stroke-width="14" stroke-linecap="round"/>
+  <text x="320" y="574" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#004B66">Seasonal Lighting</text>
+</svg>
