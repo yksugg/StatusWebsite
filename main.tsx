@@ -5,7 +5,7 @@ import HeroBanner from './components/HeroBanner';
 import CategoryTile from './components/CategoryTile';
 import ProductCard from './components/ProductCard';
 import { products, getRecommendedProducts, getBestSellers, getAmazonFavourites, getProductBySlug, Product } from './data/products';
-import { getCart, removeFromCart, updateCartItemQuantity, addToCart, getWishlist, removeFromWishlist, getRecentlyViewed, addToRecentlyViewed, login, logout, getCurrentUser, isLoggedIn as checkLoggedIn } from './utils/storage';
+import { getCart, removeFromCart, updateCartItemQuantity, addToCart, getWishlist, addToWishlist, removeFromWishlist, getRecentlyViewed, addToRecentlyViewed, login, logout, getCurrentUser, isLoggedIn as checkLoggedIn } from './utils/storage';
 import { Star, ShoppingCart, Heart, Trash2, Plus, Minus, Filter, X, ChevronDown, Package, Truck, Shield, Phone, Mail, MapPin, User, Eye } from 'lucide-react';
 
 // CSS Variables for brand colors
@@ -533,7 +533,8 @@ export default function StatusEcommerce() {
     const [addedToCart, setAddedToCart] = useState(false);
 
     const handleAddToCart = () => {
-      addToCart(selectedProduct.id, quantity);
+      const safeQuantity = typeof quantity === 'number' ? quantity : 1;
+      addToCart(selectedProduct.id, safeQuantity);
       setAddedToCart(true);
       setTimeout(() => setAddedToCart(false), 2000);
     };
@@ -652,14 +653,41 @@ export default function StatusEcommerce() {
                 <label className="block text-sm mb-2">Quantity</label>
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    onClick={() => setQuantity(Math.max(1, (typeof quantity === 'number' ? quantity : 1) - 1))}
                     className="p-2 border rounded-lg hover:bg-gray-50"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="w-16 text-center text-lg">{quantity}</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={quantity}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === '') {
+                        setQuantity('' as any);
+                        return;
+                      }
+                      if (/^\d+$/.test(value)) {
+                        const numValue = parseInt(value, 10);
+                        if (numValue >= 1 && numValue <= 999) {
+                          setQuantity(numValue);
+                        }
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      if (e.target.value === '' || Number.isNaN(val) || val < 1) {
+                        setQuantity(1);
+                      } else if (val > 999) {
+                        setQuantity(999);
+                      }
+                    }}
+                    onFocus={(e) => e.target.select()}
+                    className="w-16 text-center text-lg border rounded-lg py-1 focus:outline-none focus:ring-2 focus:ring-[var(--brand-cyan)]"
+                  />
                   <button
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() => setQuantity(Math.min(999, (typeof quantity === 'number' ? quantity : 1) + 1))}
                     className="p-2 border rounded-lg hover:bg-gray-50"
                   >
                     <Plus className="w-4 h-4" />
@@ -1219,6 +1247,8 @@ export default function StatusEcommerce() {
 
   // Cart Page
   const CartPage = () => {
+    const [editingQuantities, setEditingQuantities] = useState<Record<string, string>>({});
+
     const subtotal = cartItems.reduce((sum, item) => {
       return sum + (item.product?.price || 0) * item.quantity;
     }, 0);
@@ -1268,14 +1298,59 @@ export default function StatusEcommerce() {
                       </button>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => updateCartItemQuantity(item.productId, Math.max(1, item.quantity - 1))}
+                          onClick={() => {
+                            updateCartItemQuantity(item.productId, Math.max(1, item.quantity - 1));
+                            setEditingQuantities(prev => {
+                              const next = { ...prev };
+                              delete next[item.productId];
+                              return next;
+                            });
+                          }}
                           className="p-1 border rounded hover:bg-gray-50"
                         >
                           <Minus className="w-4 h-4" />
                         </button>
-                        <span className="w-8 text-center">{item.quantity}</span>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={editingQuantities[item.productId] ?? item.quantity}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '' || /^\d+$/.test(value)) {
+                              const parsed = parseInt(value, 10);
+                              if (value === '' || parsed <= 999) {
+                                setEditingQuantities(prev => ({ ...prev, [item.productId]: value }));
+                              }
+                            }
+                          }}
+                          onBlur={() => {
+                            const value = editingQuantities[item.productId];
+                            if (value === undefined) return;
+                            const parsed = parseInt(value, 10);
+                            updateCartItemQuantity(item.productId, !value || Number.isNaN(parsed) || parsed < 1 ? 1 : Math.min(999, parsed));
+                            setEditingQuantities(prev => {
+                              const next = { ...prev };
+                              delete next[item.productId];
+                              return next;
+                            });
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          onFocus={(e) => e.target.select()}
+                          className="w-12 text-center border rounded py-1 focus:outline-none focus:ring-2 focus:ring-[var(--brand-cyan)]"
+                        />
                         <button
-                          onClick={() => updateCartItemQuantity(item.productId, item.quantity + 1)}
+                          onClick={() => {
+                            updateCartItemQuantity(item.productId, Math.min(999, item.quantity + 1));
+                            setEditingQuantities(prev => {
+                              const next = { ...prev };
+                              delete next[item.productId];
+                              return next;
+                            });
+                          }}
                           className="p-1 border rounded hover:bg-gray-50"
                         >
                           <Plus className="w-4 h-4" />

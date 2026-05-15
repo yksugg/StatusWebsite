@@ -13,5 +13,12 @@
     "jsx": "react-jsx",
     "strict": false
   },
-  "include": ["src"]
+  "include": [
+    "main.tsx",
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    "data/**/*.ts",
+    "utils/**/*.ts",
+    "src"
+  ]
 }
