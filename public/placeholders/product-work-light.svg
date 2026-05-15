@@ -1,9 +1,0 @@
-<!-- Placeholder product image. Replace with supplied SKU photography. -->
-<svg width="640" height="640" viewBox="0 0 640 640" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="640" height="640" rx="28" fill="#F8FBFC"/>
-  <rect x="190" y="168" width="260" height="170" rx="28" fill="#004B66"/>
-  <rect x="226" y="204" width="188" height="98" rx="18" fill="#F3B23C"/>
-  <path d="M320 338v92M250 510l70-80 70 80M320 430l-28 80M320 430l28 80" stroke="#008BB1" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M238 168l-36-54M402 168l36-54" stroke="#004B66" stroke-width="16" stroke-linecap="round"/>
-  <text x="320" y="574" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#004B66">Work Light</text>
-</svg>
