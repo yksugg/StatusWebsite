@@ -98,8 +98,6 @@ export default function ProductCard({ product, onProductClick, imageUrl }: Produ
                   ? 'bg-[var(--brand-deep)] text-white'
                   : badge === 'New'
                   ? 'bg-[var(--brand-cyan)] text-white'
-                  : badge === 'Amazon Favourite'
-                  ? 'bg-orange-500 text-white'
                   : 'bg-[var(--brand-blue)] text-white'
               }`}
             >

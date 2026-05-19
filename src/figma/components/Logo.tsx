@@ -1,19 +1,21 @@
+import statusLogo from '../assets/logo/status.png';
+
 interface LogoProps {
   onClick?: () => void;
 }
 
 export default function Logo({ onClick }: LogoProps) {
   return (
-    <button 
+    <button
       onClick={onClick}
-      className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+      className="flex items-center hover:opacity-80 transition-opacity"
+      aria-label="Status International UK home"
     >
-      <div className="bg-[var(--brand-deep)] text-white px-4 py-2 rounded">
-        <span className="font-bold text-xl">STATUS</span>
-      </div>
-      <div className="hidden lg:block">
-        <div className="text-sm text-gray-600">International UK</div>
-      </div>
+      <img
+        src={statusLogo}
+        alt="Status"
+        className="h-12 w-auto object-contain"
+      />
     </button>
   );
 }

@@ -22,7 +22,6 @@ export interface Product {
   stockStatus: 'in-stock' | 'low-stock' | 'out-of-stock';
   recommended: boolean;
   bestSeller: boolean;
-  amazonFavourite: boolean;
 }
 
 export const products: Product[] = [
@@ -39,7 +38,7 @@ export const products: Product[] = [
     compareAtPrice: 7.99,
     rating: 4.5,
     reviewCount: 234,
-    badges: ['Best Seller', 'Amazon Favourite'],
+    badges: ['Best Seller'],
     images: ['led-bulb-1.jpg', 'led-bulb-2.jpg', 'led-bulb-3.jpg'],
     specifications: {
       'Wattage': '9W',
@@ -59,8 +58,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: true,
-    amazonFavourite: true
+    bestSeller: true
   },
   {
     id: '2',
@@ -94,8 +92,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: true,
-    amazonFavourite: false
+    bestSeller: true
   },
   {
     id: '3',
@@ -110,7 +107,7 @@ export const products: Product[] = [
     compareAtPrice: 16.99,
     rating: 4.7,
     reviewCount: 456,
-    badges: ['Recommended', 'Amazon Favourite'],
+    badges: ['Recommended'],
     images: ['extension-4way-1.jpg', 'extension-4way-2.jpg', 'extension-4way-3.jpg'],
     specifications: {
       'Sockets': '4',
@@ -130,8 +127,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: false,
-    amazonFavourite: true
+    bestSeller: false
   },
   {
     id: '4',
@@ -145,7 +141,7 @@ export const products: Product[] = [
     price: 5.99,
     rating: 4.4,
     reviewCount: 312,
-    badges: ['Amazon Favourite'],
+    badges: [],
     images: ['batteries-aa-1.jpg', 'batteries-aa-2.jpg'],
     specifications: {
       'Battery Type': 'Alkaline',
@@ -164,8 +160,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: false,
-    bestSeller: false,
-    amazonFavourite: true
+    bestSeller: false
   },
   {
     id: '5',
@@ -200,8 +195,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: true,
-    amazonFavourite: false
+    bestSeller: true
   },
   {
     id: '6',
@@ -235,8 +229,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: false,
-    amazonFavourite: false
+    bestSeller: false
   },
   {
     id: '7',
@@ -270,8 +263,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: false,
-    amazonFavourite: false
+    bestSeller: false
   },
   {
     id: '8',
@@ -285,7 +277,7 @@ export const products: Product[] = [
     price: 9.99,
     rating: 4.5,
     reviewCount: 167,
-    badges: ['Amazon Favourite'],
+    badges: [],
     images: ['usb-charger-1.jpg', 'usb-charger-2.jpg'],
     specifications: {
       'USB Ports': '2',
@@ -304,8 +296,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: false,
-    bestSeller: false,
-    amazonFavourite: true
+    bestSeller: false
   },
   {
     id: '9',
@@ -320,7 +311,7 @@ export const products: Product[] = [
     compareAtPrice: 24.99,
     rating: 4.4,
     reviewCount: 398,
-    badges: ['Best Seller', 'Amazon Favourite'],
+    badges: ['Best Seller'],
     images: ['led-strip-1.jpg', 'led-strip-2.jpg', 'led-strip-3.jpg'],
     specifications: {
       'Length': '5m',
@@ -340,8 +331,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: true,
-    amazonFavourite: true
+    bestSeller: true
   },
   {
     id: '10',
@@ -375,8 +365,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: false,
-    amazonFavourite: false
+    bestSeller: false
   },
   {
     id: '11',
@@ -409,8 +398,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: false,
-    bestSeller: false,
-    amazonFavourite: false
+    bestSeller: false
   },
   {
     id: '12',
@@ -424,7 +412,7 @@ export const products: Product[] = [
     price: 5.49,
     rating: 4.4,
     reviewCount: 267,
-    badges: ['Amazon Favourite'],
+    badges: [],
     images: ['batteries-aaa-1.jpg', 'batteries-aaa-2.jpg'],
     specifications: {
       'Battery Type': 'Alkaline',
@@ -443,8 +431,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: false,
-    bestSeller: false,
-    amazonFavourite: true
+    bestSeller: false
   },
   {
     id: '13',
@@ -478,8 +465,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: false,
-    amazonFavourite: false
+    bestSeller: false
   },
   {
     id: '14',
@@ -513,8 +499,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: false,
-    amazonFavourite: false
+    bestSeller: false
   },
   {
     id: '15',
@@ -528,7 +513,7 @@ export const products: Product[] = [
     price: 6.99,
     rating: 4.5,
     reviewCount: 312,
-    badges: ['Amazon Favourite'],
+    badges: [],
     images: ['night-light-1.jpg', 'night-light-2.jpg'],
     specifications: {
       'Type': 'LED',
@@ -547,8 +532,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: false,
-    bestSeller: false,
-    amazonFavourite: true
+    bestSeller: false
   },
   {
     id: '16',
@@ -562,7 +546,7 @@ export const products: Product[] = [
     price: 16.99,
     rating: 4.6,
     reviewCount: 445,
-    badges: ['Best Seller', 'Amazon Favourite'],
+    badges: ['Best Seller'],
     images: ['travel-adaptor-1.jpg', 'travel-adaptor-2.jpg', 'travel-adaptor-3.jpg'],
     specifications: {
       'Coverage': '150+ countries',
@@ -581,8 +565,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: true,
-    amazonFavourite: true
+    bestSeller: true
   },
   {
     id: '17',
@@ -616,8 +599,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: false,
-    amazonFavourite: false
+    bestSeller: false
   },
   {
     id: '18',
@@ -651,8 +633,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: false,
-    bestSeller: false,
-    amazonFavourite: false
+    bestSeller: false
   },
   {
     id: '19',
@@ -686,8 +667,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: false,
-    bestSeller: false,
-    amazonFavourite: false
+    bestSeller: false
   },
   {
     id: '20',
@@ -720,8 +700,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: false,
-    bestSeller: false,
-    amazonFavourite: false
+    bestSeller: false
   },
   {
     id: '21',
@@ -735,7 +714,7 @@ export const products: Product[] = [
     price: 12.99,
     rating: 4.6,
     reviewCount: 423,
-    badges: ['Best Seller', 'Amazon Favourite'],
+    badges: ['Best Seller'],
     images: ['fairy-lights-1.jpg', 'fairy-lights-2.jpg'],
     specifications: {
       'Length': '10m',
@@ -756,8 +735,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: true,
-    amazonFavourite: true
+    bestSeller: true
   },
   {
     id: '22',
@@ -790,8 +768,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: false,
-    amazonFavourite: false
+    bestSeller: false
   },
   {
     id: '23',
@@ -805,7 +782,7 @@ export const products: Product[] = [
     price: 17.99,
     rating: 4.5,
     reviewCount: 234,
-    badges: ['Amazon Favourite'],
+    badges: [],
     images: ['headlamp-1.jpg', 'headlamp-2.jpg', 'headlamp-3.jpg'],
     specifications: {
       'Lumens': '800lm',
@@ -826,8 +803,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: false,
-    bestSeller: false,
-    amazonFavourite: true
+    bestSeller: false
   },
   {
     id: '24',
@@ -861,8 +837,7 @@ export const products: Product[] = [
     ],
     stockStatus: 'in-stock',
     recommended: true,
-    bestSeller: true,
-    amazonFavourite: false
+    bestSeller: true
   }
 ];
 
@@ -889,11 +864,6 @@ export function getRecommendedProducts(limit: number = 8): Product[] {
 // Helper function to get best sellers
 export function getBestSellers(limit: number = 8): Product[] {
   return products.filter(p => p.bestSeller).slice(0, limit);
-}
-
-// Helper function to get Amazon favourites
-export function getAmazonFavourites(limit: number = 8): Product[] {
-  return products.filter(p => p.amazonFavourite).slice(0, limit);
 }
 
 // Get all unique categories

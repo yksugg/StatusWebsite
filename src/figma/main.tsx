@@ -4,7 +4,7 @@ import Footer from './components/Footer';
 import HeroBanner from './components/HeroBanner';
 import CategoryTile from './components/CategoryTile';
 import ProductCard from './components/ProductCard';
-import { products, getRecommendedProducts, getBestSellers, getAmazonFavourites, getProductBySlug, Product } from './data/products';
+import { products, getRecommendedProducts, getBestSellers, getProductBySlug, Product } from './data/products';
 import { getCart, removeFromCart, updateCartItemQuantity, addToCart, getWishlist, addToWishlist, removeFromWishlist, getRecentlyViewed, addToRecentlyViewed, login, logout, getCurrentUser, isLoggedIn as checkLoggedIn } from './utils/storage';
 import { Star, ShoppingCart, Heart, Trash2, Plus, Minus, Filter, X, ChevronDown, Package, Truck, Shield, Phone, Mail, MapPin, User, Eye } from 'lucide-react';
 
@@ -253,26 +253,6 @@ export default function StatusEcommerce() {
         </div>
       </div>
 
-      {/* Amazon Favourites Section */}
-      <div className="bg-orange-50 py-16 mt-8">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl mb-2">Popular on Amazon, now available direct</h2>
-            <p className="text-gray-600">Save more when you buy direct from Status</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {getAmazonFavourites(4).map(product => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                imageUrl={productImages[product.id] || 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=400'}
-                onProductClick={(slug) => handleNavigate('product', slug)}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Best Sellers */}
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-3xl mb-8">Best Sellers</h2>
@@ -409,10 +389,6 @@ export default function StatusEcommerce() {
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" className="rounded" />
                         <span className="text-sm">Best Sellers</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="rounded" />
-                        <span className="text-sm">Amazon Favourites</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" className="rounded" />
