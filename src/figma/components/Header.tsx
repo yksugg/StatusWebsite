@@ -1,18 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, User, Heart, ShoppingCart, Menu, X, ChevronDown } from 'lucide-react';
 import { getCartCount, isLoggedIn, getCurrentUser } from '../utils/storage';
+import Logo from './Logo';
 
 interface HeaderProps {
   currentPage: string;
   onNavigate: (page: string) => void;
+  onCategorySelect?: (category: string) => void;
 }
 
-export default function Header({ currentPage, onNavigate }: HeaderProps) {
+export default function Header({ currentPage, onNavigate, onCategorySelect }: HeaderProps) {
   const [cartCount, setCartCount] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const closeMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     updateCartCount();
@@ -40,6 +43,30 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
     if (searchQuery.trim()) {
       onNavigate('shop');
     }
+  };
+
+  const handleCategoryClick = (category: string) => {
+    setIsMegaMenuOpen(false);
+    onNavigate('shop');
+    if (onCategorySelect) {
+      onCategorySelect(category);
+    }
+  };
+
+  const handleMenuMouseEnter = () => {
+    // Clear any pending close timeout
+    if (closeMenuTimeoutRef.current) {
+      clearTimeout(closeMenuTimeoutRef.current);
+      closeMenuTimeoutRef.current = null;
+    }
+    setIsMegaMenuOpen(true);
+  };
+
+  const handleMenuMouseLeave = () => {
+    // Set a delay before closing the menu
+    closeMenuTimeoutRef.current = setTimeout(() => {
+      setIsMegaMenuOpen(false);
+    }, 300); // 300ms delay
   };
 
   return (
@@ -71,7 +98,7 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
               </span>
             </div>
             <div className="hidden md:block">
-              <span>Customer support: 0800 123 4567</span>
+              <span>Customer support: 01274 852200</span>
             </div>
           </div>
         </div>
@@ -82,17 +109,7 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between py-4">
             {/* Logo */}
-            <button 
-              onClick={() => onNavigate('home')}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-            >
-              <div className="bg-[var(--brand-deep)] text-white px-4 py-2 rounded">
-                <span className="font-bold text-xl">STATUS</span>
-              </div>
-              <div className="hidden lg:block">
-                <div className="text-sm text-gray-600">International UK</div>
-              </div>
-            </button>
+            <Logo onClick={() => onNavigate('home')} />
 
             {/* Desktop Search */}
             <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl mx-8">
@@ -134,7 +151,7 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
                 <span className="text-xs">Cart</span>
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-[var(--brand-cyan)] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {cartCount}
+                    {cartCount > 99 ? '99+' : cartCount}
                   </span>
                 )}
               </button>
@@ -157,54 +174,49 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
             >
               Home
             </button>
-            <button
-              onClick={() => onNavigate('shop')}
-              className={`hover:text-[var(--brand-deep)] transition-colors ${currentPage === 'shop' ? 'text-[var(--brand-deep)]' : ''}`}
-            >
-              Shop
-            </button>
             <div className="relative">
               <button
-                onMouseEnter={() => setIsMegaMenuOpen(true)}
-                onMouseLeave={() => setIsMegaMenuOpen(false)}
-                className="flex items-center gap-1 hover:text-[var(--brand-deep)] transition-colors"
+                onClick={() => onNavigate('shop')}
+                onMouseEnter={handleMenuMouseEnter}
+                onMouseLeave={handleMenuMouseLeave}
+                className={`flex items-center gap-1 hover:text-[var(--brand-deep)] transition-colors ${currentPage === 'shop' ? 'text-[var(--brand-deep)]' : ''}`}
               >
-                Categories
+                Shop
                 <ChevronDown className="w-4 h-4" />
               </button>
               
               {/* Mega Menu */}
               {isMegaMenuOpen && (
                 <div
-                  onMouseEnter={() => setIsMegaMenuOpen(true)}
-                  onMouseLeave={() => setIsMegaMenuOpen(false)}
+                  onMouseEnter={handleMenuMouseEnter}
+                  onMouseLeave={handleMenuMouseLeave}
                   className="absolute top-full left-0 mt-2 bg-white shadow-lg rounded-lg p-6 w-[600px] grid grid-cols-3 gap-6 border"
                 >
                   <div>
                     <h3 className="font-semibold mb-3 text-[var(--brand-deep)]">Lighting</h3>
                     <ul className="space-y-2 text-sm">
-                      <li><button onClick={() => onNavigate('shop')} className="hover:text-[var(--brand-cyan)]">LED Bulbs</button></li>
-                      <li><button onClick={() => onNavigate('shop')} className="hover:text-[var(--brand-cyan)]">Smart Lighting</button></li>
-                      <li><button onClick={() => onNavigate('shop')} className="hover:text-[var(--brand-cyan)]">Decorative Lighting</button></li>
-                      <li><button onClick={() => onNavigate('shop')} className="hover:text-[var(--brand-cyan)]">Desk Lamps</button></li>
+                      <li><button onClick={() => handleCategoryClick('LED Bulbs')} className="hover:text-[var(--brand-cyan)]">LED Bulbs</button></li>
+                      <li><button onClick={() => handleCategoryClick('Smart Lighting')} className="hover:text-[var(--brand-cyan)]">Smart Lighting</button></li>
+                      <li><button onClick={() => handleCategoryClick('Decorative Lighting')} className="hover:text-[var(--brand-cyan)]">Decorative Lighting</button></li>
+                      <li><button onClick={() => handleCategoryClick('Desk Lamps')} className="hover:text-[var(--brand-cyan)]">Desk Lamps</button></li>
                     </ul>
                   </div>
                   <div>
                     <h3 className="font-semibold mb-3 text-[var(--brand-deep)]">Electrical</h3>
                     <ul className="space-y-2 text-sm">
-                      <li><button onClick={() => onNavigate('shop')} className="hover:text-[var(--brand-cyan)]">Extension Leads</button></li>
-                      <li><button onClick={() => onNavigate('shop')} className="hover:text-[var(--brand-cyan)]">Plugs & Adaptors</button></li>
-                      <li><button onClick={() => onNavigate('shop')} className="hover:text-[var(--brand-cyan)]">Cable Reels</button></li>
-                      <li><button onClick={() => onNavigate('shop')} className="hover:text-[var(--brand-cyan)]">Timers & Controls</button></li>
+                      <li><button onClick={() => handleCategoryClick('Extension Leads')} className="hover:text-[var(--brand-cyan)]">Extension Leads</button></li>
+                      <li><button onClick={() => handleCategoryClick('Plugs & Adaptors')} className="hover:text-[var(--brand-cyan)]">Plugs & Adaptors</button></li>
+                      <li><button onClick={() => handleCategoryClick('Cable Reels')} className="hover:text-[var(--brand-cyan)]">Cable Reels</button></li>
+                      <li><button onClick={() => handleCategoryClick('Timers & Controls')} className="hover:text-[var(--brand-cyan)]">Timers & Controls</button></li>
                     </ul>
                   </div>
                   <div>
                     <h3 className="font-semibold mb-3 text-[var(--brand-deep)]">Power & More</h3>
                     <ul className="space-y-2 text-sm">
-                      <li><button onClick={() => onNavigate('shop')} className="hover:text-[var(--brand-cyan)]">Batteries</button></li>
-                      <li><button onClick={() => onNavigate('shop')} className="hover:text-[var(--brand-cyan)]">Torches</button></li>
-                      <li><button onClick={() => onNavigate('shop')} className="hover:text-[var(--brand-cyan)]">Work Lights</button></li>
-                      <li><button onClick={() => onNavigate('shop')} className="hover:text-[var(--brand-cyan)]">Outdoor & Garden</button></li>
+                      <li><button onClick={() => handleCategoryClick('Batteries')} className="hover:text-[var(--brand-cyan)]">Batteries</button></li>
+                      <li><button onClick={() => handleCategoryClick('Torches')} className="hover:text-[var(--brand-cyan)]">Torches</button></li>
+                      <li><button onClick={() => handleCategoryClick('Work Lights')} className="hover:text-[var(--brand-cyan)]">Work Lights</button></li>
+                      <li><button onClick={() => handleCategoryClick('Outdoor & Garden')} className="hover:text-[var(--brand-cyan)]">Outdoor & Garden</button></li>
                     </ul>
                   </div>
                 </div>
@@ -268,7 +280,7 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
                   <Heart className="w-5 h-5" /> Wishlist
                 </button>
                 <button onClick={() => { onNavigate('cart'); setIsMenuOpen(false); }} className="flex items-center gap-2 w-full py-2 hover:text-[var(--brand-deep)]">
-                  <ShoppingCart className="w-5 h-5" /> Cart {cartCount > 0 && `(${cartCount})`}
+                  <ShoppingCart className="w-5 h-5" /> Cart {cartCount > 0 && `(${cartCount > 99 ? '99+' : cartCount})`}
                 </button>
               </div>
             </nav>

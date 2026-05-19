@@ -1,3 +1,15 @@
-node_modules
-dist
+node_modules/
+dist/
 .DS_Store
+*.local
+*.deadlock-backup-*
+
+# Legacy local export files not used by the Figma Draft V2 build
+/public/
+/src/components/
+/src/context/
+/src/data/
+/src/pages/
+/src/styles.css
+/src/types.ts
+/src/utils/

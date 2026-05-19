@@ -1,7 +1,0 @@
-<!-- Replace this placeholder with the supplied Status International UK logo asset. -->
-<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="160" height="160" rx="28" fill="#004B66"/>
-  <circle cx="80" cy="80" r="52" fill="#00B3E3"/>
-  <path d="M49 91c9 13 24 20 43 20 23 0 37-10 37-27 0-14-9-22-30-27l-19-4c-9-2-13-5-13-10 0-6 6-10 16-10 11 0 20 4 27 12l14-17C113 17 99 11 82 11 60 11 45 24 45 43c0 15 10 25 30 29l19 4c9 2 12 5 12 10 0 6-6 9-17 9-12 0-22-4-30-14L49 91z" fill="white"/>
-  <rect x="35" y="124" width="90" height="10" rx="5" fill="white" opacity=".85"/>
-</svg>

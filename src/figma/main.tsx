@@ -76,6 +76,22 @@ export default function StatusEcommerce() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100]);
   const [sortBy, setSortBy] = useState('recommended');
 
+  // Category mapping from dropdown menu items to product categories
+  const categoryMapping: { [key: string]: string } = {
+    'LED Bulbs': 'Lighting',
+    'Smart Lighting': 'Lighting',
+    'Decorative Lighting': 'Lighting',
+    'Desk Lamps': 'Lighting',
+    'Extension Leads': 'Electrical Accessories',
+    'Plugs & Adaptors': 'Electrical Accessories',
+    'Cable Reels': 'Electrical Accessories',
+    'Timers & Controls': 'Electrical Accessories',
+    'Batteries': 'Batteries',
+    'Torches': 'Torches',
+    'Work Lights': 'Work Lights',
+    'Outdoor & Garden': 'Outdoor & Garden'
+  };
+
   useEffect(() => {
     updateCart();
     updateWishlist();
@@ -118,6 +134,15 @@ export default function StatusEcommerce() {
       }
     }
     window.scrollTo(0, 0);
+  };
+
+  const handleCategorySelect = (menuItem: string) => {
+    const category = categoryMapping[menuItem];
+    if (category) {
+      // Clear existing filters and set the selected category
+      setSelectedCategories([category]);
+      setPriceRange([0, 100]);
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -533,8 +558,7 @@ export default function StatusEcommerce() {
     const [addedToCart, setAddedToCart] = useState(false);
 
     const handleAddToCart = () => {
-      const safeQuantity = typeof quantity === 'number' ? quantity : 1;
-      addToCart(selectedProduct.id, safeQuantity);
+      addToCart(selectedProduct.id, quantity);
       setAddedToCart(true);
       setTimeout(() => setAddedToCart(false), 2000);
     };
@@ -653,31 +677,31 @@ export default function StatusEcommerce() {
                 <label className="block text-sm mb-2">Quantity</label>
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => setQuantity(Math.max(1, (typeof quantity === 'number' ? quantity : 1) - 1))}
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="p-2 border rounded-lg hover:bg-gray-50"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
                   <input
                     type="text"
-                    inputMode="numeric"
                     value={quantity}
                     onChange={(e) => {
                       const value = e.target.value;
+                      // Allow empty input while typing
                       if (value === '') {
                         setQuantity('' as any);
                         return;
                       }
-                      if (/^\d+$/.test(value)) {
-                        const numValue = parseInt(value, 10);
-                        if (numValue >= 1 && numValue <= 999) {
-                          setQuantity(numValue);
-                        }
+                      // Only allow numbers, minimum 1, maximum 999
+                      const numValue = parseInt(value);
+                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 999) {
+                        setQuantity(numValue);
                       }
                     }}
                     onBlur={(e) => {
-                      const val = parseInt(e.target.value, 10);
-                      if (e.target.value === '' || Number.isNaN(val) || val < 1) {
+                      // If empty or invalid on blur, set to 1
+                      const val = parseInt(e.target.value);
+                      if (e.target.value === '' || val < 1) {
                         setQuantity(1);
                       } else if (val > 999) {
                         setQuantity(999);
@@ -687,7 +711,7 @@ export default function StatusEcommerce() {
                     className="w-16 text-center text-lg border rounded-lg py-1 focus:outline-none focus:ring-2 focus:ring-[var(--brand-cyan)]"
                   />
                   <button
-                    onClick={() => setQuantity(Math.min(999, (typeof quantity === 'number' ? quantity : 1) + 1))}
+                    onClick={() => setQuantity(Math.min(999, quantity + 1))}
                     className="p-2 border rounded-lg hover:bg-gray-50"
                   >
                     <Plus className="w-4 h-4" />
@@ -822,10 +846,13 @@ export default function StatusEcommerce() {
           <div className="mb-12">
             <h2 className="text-3xl mb-4">Our Story</h2>
             <p className="text-gray-700 mb-4">
-              Status International UK has been a trusted supplier of lighting and electrical accessories for over 30 years. Based in West Yorkshire, we combine British quality standards with innovative product design to bring you reliable, affordable products for everyday use.
+              Status International UK has been a trusted supplier of lighting and electrical accessories for over 30 years. Based in Birkenshaw, West Yorkshire, we combine British quality standards with innovative product design to bring you reliable, affordable products for everyday use.
             </p>
             <p className="text-gray-700 mb-4">
               What started as a small distribution business has grown into a comprehensive range of 700+ SKUs across 44+ categories, all designed to make your life easier and your home brighter.
+            </p>
+            <p className="text-gray-700">
+              Our facility is located at Unit 1, Whitehall 26 Business Park, Heathfield Lane, Birkenshaw, BD11 2HW, where we manage our complete product inventory and dispatch orders across the UK.
             </p>
           </div>
 
@@ -962,19 +989,20 @@ export default function StatusEcommerce() {
               <Phone className="w-12 h-12 mx-auto mb-4 text-[var(--brand-deep)]" />
               <h3 className="font-semibold mb-2">Phone Support</h3>
               <p className="text-gray-600 mb-3">Mon-Fri, 9am-5pm</p>
-              <p className="text-lg text-[var(--brand-cyan)]">0800 123 4567</p>
+              <p className="text-lg text-[var(--brand-cyan)]">01274 852200</p>
             </div>
             <div className="bg-white border rounded-lg p-6 text-center hover:shadow-lg transition-shadow">
               <Mail className="w-12 h-12 mx-auto mb-4 text-[var(--brand-deep)]" />
               <h3 className="font-semibold mb-2">Email Support</h3>
               <p className="text-gray-600 mb-3">Response within 24 hours</p>
-              <p className="text-lg text-[var(--brand-cyan)]">support@status-uk.com</p>
+              <p className="text-lg text-[var(--brand-cyan)]">sales@statusinternationaluk.co.uk</p>
             </div>
             <div className="bg-white border rounded-lg p-6 text-center hover:shadow-lg transition-shadow">
               <MapPin className="w-12 h-12 mx-auto mb-4 text-[var(--brand-deep)]" />
               <h3 className="font-semibold mb-2">Visit Us</h3>
-              <p className="text-gray-600 mb-3">West Yorkshire</p>
-              <p className="text-lg text-[var(--brand-cyan)]">United Kingdom</p>
+              <p className="text-gray-600 mb-3">Unit 1, Whitehall 26 Business Park,</p>
+              <p className="text-gray-600 mb-1">Heathfield Lane, Birkenshaw,</p>
+              <p className="text-lg text-[var(--brand-cyan)]">BD11 2HW</p>
             </div>
           </div>
 
@@ -1248,7 +1276,7 @@ export default function StatusEcommerce() {
   // Cart Page
   const CartPage = () => {
     const [editingQuantities, setEditingQuantities] = useState<Record<string, string>>({});
-
+    
     const subtotal = cartItems.reduce((sum, item) => {
       return sum + (item.product?.price || 0) * item.quantity;
     }, 0);
@@ -1299,11 +1327,12 @@ export default function StatusEcommerce() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => {
-                            updateCartItemQuantity(item.productId, Math.max(1, item.quantity - 1));
+                            const newQty = Math.max(1, item.quantity - 1);
+                            updateCartItemQuantity(item.productId, newQty);
                             setEditingQuantities(prev => {
-                              const next = { ...prev };
-                              delete next[item.productId];
-                              return next;
+                              const newState = { ...prev };
+                              delete newState[item.productId];
+                              return newState;
                             });
                           }}
                           className="p-1 border rounded hover:bg-gray-50"
@@ -1312,43 +1341,64 @@ export default function StatusEcommerce() {
                         </button>
                         <input
                           type="text"
-                          inputMode="numeric"
-                          value={editingQuantities[item.productId] ?? item.quantity}
+                          value={editingQuantities[item.productId] !== undefined ? editingQuantities[item.productId] : item.quantity}
                           onChange={(e) => {
                             const value = e.target.value;
-                            if (value === '' || /^\d+$/.test(value)) {
-                              const parsed = parseInt(value, 10);
-                              if (value === '' || parsed <= 999) {
+                            // Allow empty or partial input while typing
+                            if (value === '') {
+                              setEditingQuantities(prev => ({ ...prev, [item.productId]: '' }));
+                              return;
+                            }
+                            // Only allow valid number strings
+                            if (/^\d+$/.test(value)) {
+                              const numValue = parseInt(value);
+                              if (numValue <= 999) {
                                 setEditingQuantities(prev => ({ ...prev, [item.productId]: value }));
                               }
                             }
                           }}
                           onBlur={() => {
                             const value = editingQuantities[item.productId];
-                            if (value === undefined) return;
-                            const parsed = parseInt(value, 10);
-                            updateCartItemQuantity(item.productId, !value || Number.isNaN(parsed) || parsed < 1 ? 1 : Math.min(999, parsed));
+                            if (value === undefined || value === '') {
+                              // No changes or empty, do nothing
+                              setEditingQuantities(prev => {
+                                const newState = { ...prev };
+                                delete newState[item.productId];
+                                return newState;
+                              });
+                              return;
+                            }
+                            const numValue = parseInt(value);
+                            if (numValue < 1) {
+                              updateCartItemQuantity(item.productId, 1);
+                            } else if (numValue > 999) {
+                              updateCartItemQuantity(item.productId, 999);
+                            } else {
+                              updateCartItemQuantity(item.productId, numValue);
+                            }
+                            // Clear editing state
                             setEditingQuantities(prev => {
-                              const next = { ...prev };
-                              delete next[item.productId];
-                              return next;
+                              const newState = { ...prev };
+                              delete newState[item.productId];
+                              return newState;
                             });
                           }}
+                          onFocus={(e) => e.target.select()}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               e.currentTarget.blur();
                             }
                           }}
-                          onFocus={(e) => e.target.select()}
                           className="w-12 text-center border rounded py-1 focus:outline-none focus:ring-2 focus:ring-[var(--brand-cyan)]"
                         />
                         <button
                           onClick={() => {
-                            updateCartItemQuantity(item.productId, Math.min(999, item.quantity + 1));
+                            const newQty = Math.min(999, item.quantity + 1);
+                            updateCartItemQuantity(item.productId, newQty);
                             setEditingQuantities(prev => {
-                              const next = { ...prev };
-                              delete next[item.productId];
-                              return next;
+                              const newState = { ...prev };
+                              delete newState[item.productId];
+                              return newState;
                             });
                           }}
                           className="p-1 border rounded hover:bg-gray-50"
@@ -1444,7 +1494,7 @@ export default function StatusEcommerce() {
     <div className="min-h-screen bg-white">
       <style>{styles}</style>
       
-      <Header currentPage={currentPage} onNavigate={handleNavigate} />
+      <Header currentPage={currentPage} onNavigate={handleNavigate} onCategorySelect={handleCategorySelect} />
       
       <main>
         {currentPage === 'home' && <HomePage />}
