@@ -51,9 +51,13 @@ export default function ProductCard({ product, onProductClick, imageUrl }: Produ
     }
   };
 
+  const outOfStock = product.stockStatus === 'out-of-stock';
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
-    addToCart(product.id, 1);
+    if (outOfStock) return;
+    const result = addToCart(product.id, 1);
+    if (!result.ok) return;
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };
@@ -119,13 +123,15 @@ export default function ProductCard({ product, onProductClick, imageUrl }: Produ
         </button>
 
         {/* Quick Add Button - appears on hover */}
-        <button
-          onClick={handleAddToCart}
-          className="absolute bottom-2 left-2 right-2 bg-[var(--brand-deep)] text-white py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 hover:bg-[var(--brand-blue)]"
-        >
-          <ShoppingCart className="w-4 h-4" />
-          {addedToCart ? 'Added!' : 'Quick Add'}
-        </button>
+        {!outOfStock && (
+          <button
+            onClick={handleAddToCart}
+            className="absolute bottom-2 left-2 right-2 bg-[var(--brand-deep)] text-white py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 hover:bg-[var(--brand-blue)]"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            {addedToCart ? 'Added!' : 'Quick Add'}
+          </button>
+        )}
       </div>
 
       {/* Product Info */}
@@ -133,6 +139,12 @@ export default function ProductCard({ product, onProductClick, imageUrl }: Produ
         <h3 className="text-sm mb-2 line-clamp-2 min-h-[40px]">
           {product.title}
         </h3>
+
+        {product.shortDescription && (
+          <p className="text-xs text-gray-600 mb-3 line-clamp-2 min-h-[32px]">
+            {product.shortDescription}
+          </p>
+        )}
 
         {/* Rating */}
         <div className="flex items-center gap-2 mb-2">

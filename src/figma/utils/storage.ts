@@ -1,4 +1,5 @@
-// Local storage utility functions for cart, wishlist, and user management
+// Local storage for wishlist, recently viewed, and legacy user UI.
+// Cart persistence is handled by src/mock-backend/cart.ts (B2C guest checkout).
 
 export interface CartItem {
   productId: string;
@@ -10,65 +11,14 @@ export interface User {
   name: string;
 }
 
-// Cart functions
-export function getCart(): CartItem[] {
-  try {
-    const cart = localStorage.getItem('cart');
-    return cart ? JSON.parse(cart) : [];
-  } catch {
-    return [];
-  }
-}
-
-export function getCartCount(): number {
-  const cart = getCart();
-  return cart.reduce((total, item) => total + item.quantity, 0);
-}
-
-export function addToCart(productId: string, quantity: number = 1): void {
-  const cart = getCart();
-  const existingItem = cart.find(item => item.productId === productId);
-  
-  // Enforce maximum of 999 items
-  const clampedQuantity = Math.min(999, Math.max(1, quantity));
-  
-  if (existingItem) {
-    existingItem.quantity = Math.min(999, existingItem.quantity + clampedQuantity);
-  } else {
-    cart.push({ productId, quantity: clampedQuantity });
-  }
-  
-  localStorage.setItem('cart', JSON.stringify(cart));
-  window.dispatchEvent(new Event('cartUpdated'));
-}
-
-export function removeFromCart(productId: string): void {
-  const cart = getCart();
-  const updatedCart = cart.filter(item => item.productId !== productId);
-  localStorage.setItem('cart', JSON.stringify(updatedCart));
-  window.dispatchEvent(new Event('cartUpdated'));
-}
-
-export function updateCartItemQuantity(productId: string, quantity: number): void {
-  const cart = getCart();
-  const item = cart.find(item => item.productId === productId);
-  
-  if (item) {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-    } else {
-      // Enforce maximum of 999 items
-      item.quantity = Math.min(999, Math.max(1, quantity));
-      localStorage.setItem('cart', JSON.stringify(cart));
-      window.dispatchEvent(new Event('cartUpdated'));
-    }
-  }
-}
-
-export function clearCart(): void {
-  localStorage.setItem('cart', JSON.stringify([]));
-  window.dispatchEvent(new Event('cartUpdated'));
-}
+export {
+  addToCart,
+  clearCart,
+  getCart,
+  getCartCount,
+  removeFromCart,
+  updateCartItemQuantity,
+} from '../../mock-backend/cart';
 
 // Wishlist functions
 export function getWishlist(): string[] {
@@ -114,19 +64,14 @@ export function getRecentlyViewed(): string[] {
 export function addToRecentlyViewed(productId: string): void {
   let recentlyViewed = getRecentlyViewed();
   
-  // Remove if already exists
   recentlyViewed = recentlyViewed.filter(id => id !== productId);
-  
-  // Add to beginning
   recentlyViewed.unshift(productId);
-  
-  // Keep only last 10
   recentlyViewed = recentlyViewed.slice(0, 10);
   
   localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
 }
 
-// User authentication functions
+// Legacy mock login UI (not used for checkout — guest only)
 export function getCurrentUser(): User | null {
   try {
     const user = localStorage.getItem('currentUser');

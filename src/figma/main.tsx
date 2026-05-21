@@ -4,8 +4,15 @@ import Footer from './components/Footer';
 import HeroBanner from './components/HeroBanner';
 import CategoryTile from './components/CategoryTile';
 import ProductCard from './components/ProductCard';
-import { products, getRecommendedProducts, getBestSellers, getProductBySlug, Product } from './data/products';
-import { getCart, removeFromCart, updateCartItemQuantity, addToCart, getWishlist, addToWishlist, removeFromWishlist, getRecentlyViewed, addToRecentlyViewed, login, logout, getCurrentUser, isLoggedIn as checkLoggedIn } from './utils/storage';
+import { Product } from './data/products';
+import { getWishlist, addToWishlist, removeFromWishlist, getRecentlyViewed, addToRecentlyViewed, login, logout, getCurrentUser, isLoggedIn as checkLoggedIn } from './utils/storage';
+import { useProducts } from '../hooks/useProducts';
+import { useCart } from '../hooks/useCart';
+import { useCheckout } from '../hooks/useCheckout';
+import { getProductById as getMockProductById } from '../mock-backend/products';
+import { UK_SHIPPING_CONFIG } from '../mock-backend/shipping';
+import { resolveProductImageUrl } from './utils/productImage';
+import { getStorefrontPath } from '../utils/routing';
 import { Star, ShoppingCart, Heart, Trash2, Plus, Minus, Filter, X, ChevronDown, Package, Truck, Shield, Phone, Mail, MapPin, User, Eye } from 'lucide-react';
 
 // CSS Variables for brand colors
@@ -16,34 +23,6 @@ const styles = `
     --brand-cyan: #00B3E3;
   }
 `;
-
-// Product images mapping - using Unsplash placeholders
-const productImages: Record<string, string> = {
-  '1': 'https://images.unsplash.com/photo-1532007271951-c487760934ae?w=400',
-  '2': 'https://images.unsplash.com/photo-1532007271951-c487760934ae?w=400',
-  '3': 'https://images.unsplash.com/photo-1610056494071-9373f12bf769?w=400',
-  '4': 'https://images.unsplash.com/photo-1619641805634-b867f535071c?w=400',
-  '5': 'https://images.unsplash.com/photo-1685342654383-584d56907425?w=400',
-  '6': 'https://images.unsplash.com/photo-1608377205619-03a0b4c4e270?w=400',
-  '7': 'https://images.unsplash.com/photo-1610056494071-9373f12bf769?w=400',
-  '8': 'https://images.unsplash.com/photo-1610056494071-9373f12bf769?w=400',
-  '9': 'https://images.unsplash.com/photo-1511461744085-90a4d1c66be3?w=400',
-  '10': 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=400',
-  '11': 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=400',
-  '12': 'https://images.unsplash.com/photo-1619641805634-b867f535071c?w=400',
-  '13': 'https://images.unsplash.com/photo-1658692051708-519fbdac7e8f?w=400',
-  '14': 'https://images.unsplash.com/photo-1610056494071-9373f12bf769?w=400',
-  '15': 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=400',
-  '16': 'https://images.unsplash.com/photo-1610056494071-9373f12bf769?w=400',
-  '17': 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=400',
-  '18': 'https://images.unsplash.com/photo-1658692051708-519fbdac7e8f?w=400',
-  '19': 'https://images.unsplash.com/photo-1610056494071-9373f12bf769?w=400',
-  '20': 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=400',
-  '21': 'https://images.unsplash.com/photo-1511461744085-90a4d1c66be3?w=400',
-  '22': 'https://images.unsplash.com/photo-1610056494071-9373f12bf769?w=400',
-  '23': 'https://images.unsplash.com/photo-1685342654383-584d56907425?w=400',
-  '24': 'https://images.unsplash.com/photo-1610056494071-9373f12bf769?w=400',
-};
 
 function ImageWithFallback(props: any) {
   const [didError, setDidError] = useState(false)
@@ -64,11 +43,15 @@ function ImageWithFallback(props: any) {
 }
 
 export default function StatusEcommerce() {
+  const { products, getProductBySlug, getRecommendedProducts, getBestSellers } = useProducts();
+  const cart = useCart();
+  const checkout = useCheckout();
+
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [cartItems, setCartItems] = useState<any[]>([]);
   const [wishlistItems, setWishlistItems] = useState<string[]>([]);
   const [recentlyViewedIds, setRecentlyViewedIds] = useState<string[]>([]);
+  const [cartMessage, setCartMessage] = useState<string | null>(null);
   
   // Shop page state
   const [filterOpen, setFilterOpen] = useState(false);
@@ -93,27 +76,21 @@ export default function StatusEcommerce() {
   };
 
   useEffect(() => {
-    updateCart();
     updateWishlist();
     updateRecentlyViewed();
 
-    window.addEventListener('cartUpdated', updateCart);
     window.addEventListener('wishlistUpdated', updateWishlist);
     
     return () => {
-      window.removeEventListener('cartUpdated', updateCart);
       window.removeEventListener('wishlistUpdated', updateWishlist);
     };
   }, []);
 
-  const updateCart = () => {
-    const cart = getCart();
-    const items = cart.map(item => ({
-      ...item,
-      product: products.find(p => p.id === item.productId)
-    }));
-    setCartItems(items);
-  };
+  useEffect(() => {
+    if (!selectedProduct) return;
+    const refreshed = getProductBySlug(selectedProduct.slug);
+    if (refreshed) setSelectedProduct(refreshed);
+  }, [products, selectedProduct?.slug, getProductBySlug]);
 
   const updateWishlist = () => {
     setWishlistItems(getWishlist());
@@ -123,18 +100,67 @@ export default function StatusEcommerce() {
     setRecentlyViewedIds(getRecentlyViewed());
   };
 
-  const handleNavigate = (page: string, productSlug?: string) => {
-    setCurrentPage(page);
+  const getStorePath = (page: string, productSlug?: string) => {
+    const base = getStorefrontPath();
+    const path = page === 'home' ? '' : page === 'product' && productSlug ? `product/${productSlug}` : page;
+    return `${base}${path}`.replace(/\/+/g, '/');
+  };
+
+  const getRouteFromLocation = () => {
+    const base = getStorefrontPath();
+    let path = window.location.pathname;
+    if (base !== '/' && path.startsWith(base)) {
+      path = path.slice(base.length);
+    } else {
+      path = path.replace(/^\//, '');
+    }
+    path = path.replace(/^\/+|\/+$/g, '');
+
+    if (!path) return { page: 'home' };
+    const [page, ...rest] = path.split('/');
+    if (page === 'product' && rest[0]) return { page: 'product', productSlug: decodeURIComponent(rest[0]) };
+    return { page };
+  };
+
+  const applyRoute = (page: string, productSlug?: string) => {
     if (page === 'product' && productSlug) {
       const product = getProductBySlug(productSlug);
       if (product) {
         setSelectedProduct(product);
         addToRecentlyViewed(product.id);
         updateRecentlyViewed();
+        setCurrentPage('product');
+        return;
       }
+      setSelectedProduct(null);
+      setCurrentPage('shop');
+      return;
+    }
+
+    setSelectedProduct(null);
+    setCurrentPage(page);
+  };
+
+  const handleNavigate = (page: string, productSlug?: string) => {
+    applyRoute(page, productSlug);
+    const nextPath = getStorePath(page, productSlug);
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({}, '', nextPath);
     }
     window.scrollTo(0, 0);
   };
+
+  useEffect(() => {
+    const syncRoute = () => {
+      const route = getRouteFromLocation();
+      applyRoute(route.page, route.productSlug);
+      window.scrollTo(0, 0);
+    };
+
+    syncRoute();
+    window.addEventListener('popstate', syncRoute);
+    return () => window.removeEventListener('popstate', syncRoute);
+  }, [getProductBySlug]);
 
   const handleCategorySelect = (menuItem: string) => {
     const category = categoryMapping[menuItem];
@@ -246,7 +272,7 @@ export default function StatusEcommerce() {
             <ProductCard
               key={product.id}
               product={product}
-              imageUrl={productImages[product.id] || 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=400'}
+              imageUrl={resolveProductImageUrl(product)}
               onProductClick={(slug) => handleNavigate('product', slug)}
             />
           ))}
@@ -261,7 +287,7 @@ export default function StatusEcommerce() {
             <ProductCard
               key={product.id}
               product={product}
-              imageUrl={productImages[product.id] || 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=400'}
+              imageUrl={resolveProductImageUrl(product)}
               onProductClick={(slug) => handleNavigate('product', slug)}
             />
           ))}
@@ -310,7 +336,7 @@ export default function StatusEcommerce() {
         </div>
 
         <div className="container mx-auto px-4 py-8">
-          <div className="flex gap-8">
+          <div className="flex gap-6">
             {/* Desktop Filters Sidebar */}
             <aside className="hidden lg:block w-64 flex-shrink-0">
               <div className="sticky top-24">
@@ -444,7 +470,7 @@ export default function StatusEcommerce() {
                   <ProductCard
                     key={product.id}
                     product={product}
-                    imageUrl={productImages[product.id] || 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=400'}
+                    imageUrl={resolveProductImageUrl(product)}
                     onProductClick={(slug) => handleNavigate('product', slug)}
                   />
                 ))}
@@ -462,7 +488,7 @@ export default function StatusEcommerce() {
                         <ProductCard
                           key={product.id}
                           product={product}
-                          imageUrl={productImages[product.id] || 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=400'}
+                          imageUrl={resolveProductImageUrl(product)}
                           onProductClick={(slug) => handleNavigate('product', slug)}
                         />
                       );
@@ -532,9 +558,19 @@ export default function StatusEcommerce() {
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
     const [addedToCart, setAddedToCart] = useState(false);
+    const [detailsTab, setDetailsTab] = useState<'description' | 'reviews'>('description');
+    const liveProduct = getMockProductById(selectedProduct.id);
+    const maxQty = liveProduct?.stock ?? 0;
+    const outOfStock = selectedProduct.stockStatus === 'out-of-stock' || maxQty <= 0;
 
     const handleAddToCart = () => {
-      addToCart(selectedProduct.id, quantity);
+      if (outOfStock) return;
+      const result = cart.addToCart(selectedProduct.id, typeof quantity === 'number' ? quantity : 1);
+      if (!result.ok) {
+        setCartMessage(result.error);
+        setTimeout(() => setCartMessage(null), 3000);
+        return;
+      }
       setAddedToCart(true);
       setTimeout(() => setAddedToCart(false), 2000);
     };
@@ -566,7 +602,7 @@ export default function StatusEcommerce() {
             <div>
               <div className="mb-4">
                 <ImageWithFallback
-                  src={productImages[selectedProduct.id] || 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=800'}
+                  src={resolveProductImageUrl(selectedProduct, 'large')}
                   alt={selectedProduct.title}
                   className="w-full aspect-square object-cover rounded-lg border"
                 />
@@ -581,7 +617,7 @@ export default function StatusEcommerce() {
                     }`}
                   >
                     <ImageWithFallback
-                      src={productImages[selectedProduct.id] || 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=200'}
+                      src={resolveProductImageUrl(selectedProduct)}
                       alt={`${selectedProduct.title} view ${idx + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -633,27 +669,36 @@ export default function StatusEcommerce() {
                 )}
               </div>
 
-              {/* Description */}
-              <p className="text-gray-700 mb-6">{selectedProduct.longDescription}</p>
+              {/* Short Description */}
+              <p className="text-gray-700 mb-6">{selectedProduct.shortDescription}</p>
 
               {/* Stock Status */}
               <div className="mb-6">
-                {selectedProduct.stockStatus === 'in-stock' && (
+                {outOfStock ? (
+                  <span className="flex items-center gap-2 text-red-600 font-medium">
+                    Out of Stock
+                  </span>
+                ) : selectedProduct.stockStatus === 'low-stock' ? (
+                  <span className="flex items-center gap-2 text-orange-600">
+                    Low Stock — only {maxQty} left
+                  </span>
+                ) : (
                   <span className="flex items-center gap-2 text-green-600">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
-                    In Stock - Ready to ship
+                    In Stock — Ready to ship
                   </span>
                 )}
               </div>
 
               {/* Quantity Selector */}
+              {!outOfStock && (
               <div className="mb-6">
                 <label className="block text-sm mb-2">Quantity</label>
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    onClick={() => setQuantity(Math.max(1, (typeof quantity === 'number' ? quantity : 1) - 1))}
                     className="p-2 border rounded-lg hover:bg-gray-50"
                   >
                     <Minus className="w-4 h-4" />
@@ -663,48 +708,54 @@ export default function StatusEcommerce() {
                     value={quantity}
                     onChange={(e) => {
                       const value = e.target.value;
-                      // Allow empty input while typing
                       if (value === '') {
                         setQuantity('' as any);
                         return;
                       }
-                      // Only allow numbers, minimum 1, maximum 999
                       const numValue = parseInt(value);
-                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 999) {
+                      if (!isNaN(numValue) && numValue >= 1 && numValue <= maxQty) {
                         setQuantity(numValue);
                       }
                     }}
                     onBlur={(e) => {
-                      // If empty or invalid on blur, set to 1
                       const val = parseInt(e.target.value);
                       if (e.target.value === '' || val < 1) {
                         setQuantity(1);
-                      } else if (val > 999) {
-                        setQuantity(999);
+                      } else if (val > maxQty) {
+                        setQuantity(maxQty);
                       }
                     }}
                     onFocus={(e) => e.target.select()}
                     className="w-16 text-center text-lg border rounded-lg py-1 focus:outline-none focus:ring-2 focus:ring-[var(--brand-cyan)]"
                   />
                   <button
-                    onClick={() => setQuantity(Math.min(999, quantity + 1))}
+                    onClick={() => setQuantity(Math.min(maxQty, (typeof quantity === 'number' ? quantity : 1) + 1))}
                     className="p-2 border rounded-lg hover:bg-gray-50"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
               </div>
+              )}
 
               {/* Buy Box */}
               <div className="space-y-3 mb-6">
                 <button
                   onClick={handleAddToCart}
-                  className="w-full px-6 py-4 bg-[var(--brand-cyan)] text-white rounded-lg hover:bg-[var(--brand-blue)] transition-colors flex items-center justify-center gap-2 text-lg"
+                  disabled={outOfStock}
+                  className="w-full px-6 py-4 bg-[var(--brand-cyan)] text-white rounded-lg hover:bg-[var(--brand-blue)] transition-colors flex items-center justify-center gap-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ShoppingCart className="w-5 h-5" />
-                  {addedToCart ? 'Added to Cart!' : 'Add to Cart'}
+                  {outOfStock ? 'Out of Stock' : addedToCart ? 'Added to Cart!' : 'Add to Cart'}
                 </button>
-                <button className="w-full px-6 py-4 bg-[var(--brand-deep)] text-white rounded-lg hover:opacity-90 transition-opacity text-lg">
+                <button
+                  disabled={outOfStock}
+                  onClick={() => {
+                    handleAddToCart();
+                    if (!outOfStock) handleNavigate('checkout');
+                  }}
+                  className="w-full px-6 py-4 bg-[var(--brand-deep)] text-white rounded-lg hover:opacity-90 transition-opacity text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   Buy Now
                 </button>
                 <button
@@ -743,46 +794,82 @@ export default function StatusEcommerce() {
           {/* Product Details Tabs */}
           <div className="mt-16">
             <div className="border-b">
-              <div className="flex gap-8">
-                <button className="pb-4 border-b-2 border-[var(--brand-deep)] text-[var(--brand-deep)]">
+              <div className="flex flex-wrap gap-x-6 gap-y-3">
+                <button
+                  type="button"
+                  onClick={() => setDetailsTab('description')}
+                  className={`pb-4 border-b-2 transition-colors ${
+                    detailsTab === 'description'
+                      ? 'border-[var(--brand-deep)] text-[var(--brand-deep)]'
+                      : 'border-transparent text-gray-600 hover:text-[var(--brand-deep)]'
+                  }`}
+                >
                   Description
                 </button>
-                <button className="pb-4 text-gray-600">
-                  Specifications
-                </button>
-                <button className="pb-4 text-gray-600">
+                <button
+                  type="button"
+                  onClick={() => setDetailsTab('reviews')}
+                  className={`pb-4 border-b-2 transition-colors ${
+                    detailsTab === 'reviews'
+                      ? 'border-[var(--brand-deep)] text-[var(--brand-deep)]'
+                      : 'border-transparent text-gray-600 hover:text-[var(--brand-deep)]'
+                  }`}
+                >
                   Reviews
                 </button>
               </div>
             </div>
 
             <div className="py-8">
-              <h3 className="text-xl mb-4">Product Description</h3>
-              <p className="text-gray-700 mb-6">{selectedProduct.longDescription}</p>
+              {detailsTab === 'description' ? (
+                <>
+                  <h3 className="text-xl mb-4">Product Description</h3>
+                  <p className="text-gray-700 mb-6">{selectedProduct.longDescription}</p>
 
-              <h4 className="font-semibold mb-3">Key Features:</h4>
-              <ul className="space-y-2 mb-6">
-                {selectedProduct.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
+                  <h4 className="font-semibold mb-3">Key Features:</h4>
+                  <ul className="space-y-2 mb-6">
+                    {selectedProduct.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-              <h4 className="font-semibold mb-3">Specifications:</h4>
-              <div className="bg-gray-50 rounded-lg p-6">
-                <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(selectedProduct.specifications).map(([key, value]) => (
-                    <div key={key} className="border-b border-gray-200 pb-2">
-                      <dt className="text-sm text-gray-600">{key}</dt>
-                      <dd className="font-semibold">{value}</dd>
+                  <h4 className="font-semibold mb-3">Specifications:</h4>
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Object.entries(selectedProduct.specifications).map(([key, value]) => (
+                        <div key={key} className="border-b border-gray-200 pb-2">
+                          <dt className="text-sm text-gray-600">{key}</dt>
+                          <dd className="font-semibold">{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                </>
+              ) : (
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h3 className="text-xl mb-3">Reviews</h3>
+                  {selectedProduct.reviewCount > 0 ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        {renderStars(Math.round(selectedProduct.rating))}
+                        <span className="text-gray-700">
+                          {selectedProduct.rating} out of 5 based on {selectedProduct.reviewCount} reviews
+                        </span>
+                      </div>
+                      <p className="text-gray-600">
+                        Review details will appear here once the verified review feed is connected.
+                      </p>
                     </div>
-                  ))}
-                </dl>
-              </div>
+                  ) : (
+                    <p className="text-gray-600">No reviews on this product yet.</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -795,7 +882,7 @@ export default function StatusEcommerce() {
                   <ProductCard
                     key={product.id}
                     product={product}
-                    imageUrl={productImages[product.id] || 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=400'}
+                    imageUrl={resolveProductImageUrl(product)}
                     onProductClick={(slug) => handleNavigate('product', slug)}
                   />
                 ))}
@@ -1125,7 +1212,7 @@ export default function StatusEcommerce() {
               >
                 <ShoppingCart className="w-8 h-8 mb-3 text-[var(--brand-deep)]" />
                 <h3 className="font-semibold mb-1">My Cart</h3>
-                <p className="text-sm text-gray-600">{cartItems.length} items</p>
+                <p className="text-sm text-gray-600">{cart.lines.length} items</p>
               </button>
               <button
                 onClick={() => handleNavigate('wishlist')}
@@ -1164,7 +1251,7 @@ export default function StatusEcommerce() {
                       <ProductCard
                         key={product.id}
                         product={product}
-                        imageUrl={productImages[product.id] || 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=400'}
+                        imageUrl={resolveProductImageUrl(product)}
                         onProductClick={(slug) => handleNavigate('product', slug)}
                       />
                     );
@@ -1252,16 +1339,15 @@ export default function StatusEcommerce() {
   // Cart Page
   const CartPage = () => {
     const [editingQuantities, setEditingQuantities] = useState<Record<string, string>>({});
-    
-    const subtotal = cartItems.reduce((sum, item) => {
-      return sum + (item.product?.price || 0) * item.quantity;
-    }, 0);
-    const delivery = subtotal >= 50 ? 0 : 4.99;
-    const total = subtotal + delivery;
+    const cartItems = cart.lines;
+    const { subtotal, shipping: delivery, total } = cart;
 
     return (
       <div className="container mx-auto px-4 py-16">
         <h1 className="text-3xl mb-8">Shopping Cart</h1>
+        {cartMessage && (
+          <p className="mb-4 text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2">{cartMessage}</p>
+        )}
 
         {cartItems.length === 0 ? (
           <div className="text-center py-16">
@@ -1280,11 +1366,12 @@ export default function StatusEcommerce() {
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
               {cartItems.map(item => {
-                if (!item.product) return null;
+                const stock = getMockProductById(item.product.id)?.stock ?? 0;
+                const maxQty = Math.max(1, stock);
                 return (
                   <div key={item.productId} className="bg-white border rounded-lg p-4 flex gap-4">
                     <ImageWithFallback
-                      src={productImages[item.product.id] || 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=200'}
+                      src={resolveProductImageUrl(item.product)}
                       alt={item.product.title}
                       className="w-24 h-24 object-cover rounded"
                     />
@@ -1292,10 +1379,13 @@ export default function StatusEcommerce() {
                       <h3 className="font-semibold mb-1">{item.product.title}</h3>
                       <p className="text-sm text-gray-600 mb-2">SKU: {item.product.sku}</p>
                       <p className="text-lg text-[var(--brand-deep)]">£{item.product.price.toFixed(2)}</p>
+                      {item.product.stockStatus === 'out-of-stock' && (
+                        <p className="text-sm text-red-600 mt-1">Out of stock — remove to continue</p>
+                      )}
                     </div>
                     <div className="flex flex-col items-end justify-between">
                       <button
-                        onClick={() => removeFromCart(item.productId)}
+                        onClick={() => cart.removeFromCart(item.productId)}
                         className="text-red-500 hover:text-red-700"
                       >
                         <Trash2 className="w-5 h-5" />
@@ -1304,7 +1394,7 @@ export default function StatusEcommerce() {
                         <button
                           onClick={() => {
                             const newQty = Math.max(1, item.quantity - 1);
-                            updateCartItemQuantity(item.productId, newQty);
+                            cart.updateCartItemQuantity(item.productId, newQty);
                             setEditingQuantities(prev => {
                               const newState = { ...prev };
                               delete newState[item.productId];
@@ -1320,15 +1410,13 @@ export default function StatusEcommerce() {
                           value={editingQuantities[item.productId] !== undefined ? editingQuantities[item.productId] : item.quantity}
                           onChange={(e) => {
                             const value = e.target.value;
-                            // Allow empty or partial input while typing
                             if (value === '') {
                               setEditingQuantities(prev => ({ ...prev, [item.productId]: '' }));
                               return;
                             }
-                            // Only allow valid number strings
                             if (/^\d+$/.test(value)) {
                               const numValue = parseInt(value);
-                              if (numValue <= 999) {
+                              if (numValue <= maxQty) {
                                 setEditingQuantities(prev => ({ ...prev, [item.productId]: value }));
                               }
                             }
@@ -1336,7 +1424,6 @@ export default function StatusEcommerce() {
                           onBlur={() => {
                             const value = editingQuantities[item.productId];
                             if (value === undefined || value === '') {
-                              // No changes or empty, do nothing
                               setEditingQuantities(prev => {
                                 const newState = { ...prev };
                                 delete newState[item.productId];
@@ -1346,13 +1433,13 @@ export default function StatusEcommerce() {
                             }
                             const numValue = parseInt(value);
                             if (numValue < 1) {
-                              updateCartItemQuantity(item.productId, 1);
-                            } else if (numValue > 999) {
-                              updateCartItemQuantity(item.productId, 999);
+                              cart.updateCartItemQuantity(item.productId, 1);
+                            } else if (numValue > maxQty) {
+                              cart.updateCartItemQuantity(item.productId, maxQty);
                             } else {
-                              updateCartItemQuantity(item.productId, numValue);
+                              const result = cart.updateCartItemQuantity(item.productId, numValue);
+                              if (!result.ok) setCartMessage(result.error);
                             }
-                            // Clear editing state
                             setEditingQuantities(prev => {
                               const newState = { ...prev };
                               delete newState[item.productId];
@@ -1369,8 +1456,9 @@ export default function StatusEcommerce() {
                         />
                         <button
                           onClick={() => {
-                            const newQty = Math.min(999, item.quantity + 1);
-                            updateCartItemQuantity(item.productId, newQty);
+                            const newQty = Math.min(maxQty, item.quantity + 1);
+                            const result = cart.updateCartItemQuantity(item.productId, newQty);
+                            if (!result.ok) setCartMessage(result.error);
                             setEditingQuantities(prev => {
                               const newState = { ...prev };
                               delete newState[item.productId];
@@ -1401,11 +1489,12 @@ export default function StatusEcommerce() {
                     <span className="text-gray-600">Delivery</span>
                     <span>{delivery === 0 ? 'FREE' : `£${delivery.toFixed(2)}`}</span>
                   </div>
-                  {subtotal < 50 && subtotal > 0 && (
+                  {subtotal < UK_SHIPPING_CONFIG.freeShippingThreshold && subtotal > 0 && (
                     <p className="text-sm text-gray-600">
-                      Spend £{(50 - subtotal).toFixed(2)} more for free delivery
+                      Spend £{(UK_SHIPPING_CONFIG.freeShippingThreshold - subtotal).toFixed(2)} more for free UK delivery
                     </p>
                   )}
+                  <p className="text-xs text-gray-500">{UK_SHIPPING_CONFIG.methodLabel} — UK addresses only</p>
                   <div className="border-t pt-3">
                     <div className="flex justify-between text-lg">
                       <span className="font-semibold">Total</span>
@@ -1413,7 +1502,10 @@ export default function StatusEcommerce() {
                     </div>
                   </div>
                 </div>
-                <button className="w-full px-6 py-3 bg-[var(--brand-cyan)] text-white rounded-lg hover:bg-[var(--brand-blue)] mb-3">
+                <button
+                  onClick={() => handleNavigate('checkout')}
+                  className="w-full px-6 py-3 bg-[var(--brand-cyan)] text-white rounded-lg hover:bg-[var(--brand-blue)] mb-3"
+                >
                   Proceed to Checkout
                 </button>
                 <button
@@ -1426,6 +1518,252 @@ export default function StatusEcommerce() {
             </div>
           </div>
         )}
+      </div>
+    );
+  };
+
+  // Guest checkout (UK only, mock payment)
+  const CheckoutPage = () => {
+    const { guest, error, lastOrder, submitting, placeOrderWithGuest } = checkout;
+    const { subtotal, shipping, total, lines } = cart;
+
+    if (lastOrder) {
+      return (
+        <div className="container mx-auto px-4 py-16 max-w-2xl">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-8 text-center">
+            <h1 className="text-3xl mb-2 text-green-800">Order placed</h1>
+            <p className="text-gray-700 mb-4">
+              Thank you. Your mock order number is <strong>{lastOrder.orderNumber}</strong>.
+            </p>
+            <p className="text-sm text-gray-600 mb-6">
+              No payment was taken. Stock has been updated in this browser for demo purposes.
+            </p>
+            <button
+              onClick={() => {
+                checkout.reset();
+                handleNavigate('shop');
+              }}
+              className="px-8 py-3 bg-[var(--brand-cyan)] text-white rounded-lg hover:bg-[var(--brand-blue)]"
+            >
+              Continue Shopping
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (lines.length === 0) {
+      return (
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h1 className="text-3xl mb-4">Checkout</h1>
+          <p className="text-gray-600 mb-6">Your cart is empty.</p>
+          <button
+            onClick={() => handleNavigate('shop')}
+            className="px-8 py-3 bg-[var(--brand-cyan)] text-white rounded-lg"
+          >
+            Shop Products
+          </button>
+        </div>
+      );
+    }
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const order = placeOrderWithGuest({
+        fullName: String(formData.get('name') ?? ''),
+        email: String(formData.get('email') ?? ''),
+        phone: String(formData.get('tel') ?? ''),
+        line1: String(formData.get('address-line1') ?? ''),
+        line2: String(formData.get('address-line2') ?? ''),
+        city: String(formData.get('address-level2') ?? ''),
+        county: String(formData.get('address-level1') ?? ''),
+        postcode: String(formData.get('postal-code') ?? ''),
+        country: 'United Kingdom',
+      });
+      if (!order) return;
+      window.scrollTo(0, 0);
+    };
+
+    return (
+      <div className="container mx-auto px-4 py-16">
+        <h1 className="text-3xl mb-2">Guest Checkout</h1>
+        <p className="text-gray-600 mb-8">UK delivery only. No account or payment required for this prototype.</p>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          <form onSubmit={handleSubmit} autoComplete="on" className="lg:col-span-2 space-y-4">
+            {error && (
+              <p className="text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2">{error}</p>
+            )}
+            <div className="bg-white border rounded-lg p-6 space-y-4">
+              <h2 className="text-xl font-semibold">Contact</h2>
+              <div>
+                <label htmlFor="checkout-full-name" className="block text-sm mb-2">Full name *</label>
+                <input
+                  id="checkout-full-name"
+                  name="name"
+                  type="text"
+                  autoComplete="section-checkout shipping name"
+                  required
+                  defaultValue={guest.fullName}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-cyan)]"
+                />
+              </div>
+              <div>
+                <label htmlFor="checkout-email" className="block text-sm mb-2">Email *</label>
+                <input
+                  id="checkout-email"
+                  name="email"
+                  type="email"
+                  autoComplete="section-checkout shipping email"
+                  required
+                  defaultValue={guest.email}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-cyan)]"
+                />
+              </div>
+              <div>
+                <label htmlFor="checkout-phone" className="block text-sm mb-2">Phone</label>
+                <input
+                  id="checkout-phone"
+                  name="tel"
+                  type="tel"
+                  autoComplete="section-checkout shipping tel"
+                  defaultValue={guest.phone}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-cyan)]"
+                />
+              </div>
+            </div>
+
+            <div className="bg-white border rounded-lg p-6 space-y-4">
+              <h2 className="text-xl font-semibold">UK delivery address</h2>
+              <div>
+                <label htmlFor="checkout-address-line1" className="block text-sm mb-2">Address line 1 *</label>
+                <input
+                  id="checkout-address-line1"
+                  name="address-line1"
+                  type="text"
+                  autoComplete="section-checkout shipping address-line1"
+                  required
+                  defaultValue={guest.line1}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-cyan)]"
+                />
+              </div>
+              <div>
+                <label htmlFor="checkout-address-line2" className="block text-sm mb-2">Address line 2</label>
+                <input
+                  id="checkout-address-line2"
+                  name="address-line2"
+                  type="text"
+                  autoComplete="section-checkout shipping address-line2"
+                  defaultValue={guest.line2 ?? ''}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-cyan)]"
+                />
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="checkout-city" className="block text-sm mb-2">Town / city *</label>
+                  <input
+                    id="checkout-city"
+                    name="address-level2"
+                    type="text"
+                    autoComplete="section-checkout shipping address-level2"
+                    required
+                    defaultValue={guest.city}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-cyan)]"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="checkout-county" className="block text-sm mb-2">County</label>
+                  <input
+                    id="checkout-county"
+                    name="address-level1"
+                    type="text"
+                    autoComplete="section-checkout shipping address-level1"
+                    defaultValue={guest.county ?? ''}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-cyan)]"
+                  />
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="checkout-postcode" className="block text-sm mb-2">Postcode *</label>
+                  <input
+                    id="checkout-postcode"
+                    name="postal-code"
+                    type="text"
+                    autoComplete="section-checkout shipping postal-code"
+                    required
+                    placeholder="BD11 2HW"
+                    defaultValue={guest.postcode}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-cyan)]"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="checkout-country" className="block text-sm mb-2">Country</label>
+                  <input
+                    id="checkout-country"
+                    name="country-name"
+                    type="text"
+                    autoComplete="section-checkout shipping country-name"
+                    readOnly
+                    value="United Kingdom"
+                    className="w-full px-4 py-2 border rounded-lg bg-gray-50 text-gray-600"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 border rounded-lg p-4 text-sm text-gray-600">
+              <p className="font-semibold text-gray-800 mb-1">Mock payment</p>
+              <p>No card details are collected. Placing the order saves it locally and reduces stock for demo purposes.</p>
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full px-6 py-4 bg-[var(--brand-cyan)] text-white rounded-lg hover:bg-[var(--brand-blue)] text-lg disabled:opacity-50"
+            >
+              {submitting ? 'Placing order…' : 'Place order'}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleNavigate('cart')}
+              className="w-full px-6 py-3 border rounded-lg hover:bg-gray-50"
+            >
+              Back to cart
+            </button>
+          </form>
+
+          <div>
+            <div className="bg-white border rounded-lg p-6 sticky top-24">
+              <h3 className="font-semibold text-lg mb-4">Order summary</h3>
+              <ul className="space-y-3 mb-4 text-sm">
+                {lines.map((line) => (
+                  <li key={line.productId} className="flex justify-between gap-2">
+                    <span className="text-gray-700">
+                      {line.product.title} × {line.quantity}
+                    </span>
+                    <span>£{(line.product.price * line.quantity).toFixed(2)}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="space-y-2 border-t pt-3 text-sm">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>£{subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{UK_SHIPPING_CONFIG.methodLabel}</span>
+                  <span>{shipping === 0 ? 'FREE' : `£${shipping.toFixed(2)}`}</span>
+                </div>
+                <div className="flex justify-between font-semibold text-base pt-2">
+                  <span>Total</span>
+                  <span>£{total.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   };
@@ -1456,7 +1794,7 @@ export default function StatusEcommerce() {
               <ProductCard
                 key={product.id}
                 product={product}
-                imageUrl={productImages[product.id] || 'https://images.unsplash.com/photo-1606170033648-5d55a3edf314?w=400'}
+                imageUrl={resolveProductImageUrl(product)}
                 onProductClick={(slug) => handleNavigate('product', slug)}
               />
             ))}
@@ -1480,6 +1818,7 @@ export default function StatusEcommerce() {
         {currentPage === 'contact' && <ContactPage />}
         {currentPage === 'login' && <LoginPage />}
         {currentPage === 'cart' && <CartPage />}
+        {currentPage === 'checkout' && <CheckoutPage />}
         {currentPage === 'wishlist' && <WishlistPage />}
       </main>
       
