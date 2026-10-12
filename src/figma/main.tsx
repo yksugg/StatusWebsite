@@ -781,7 +781,7 @@ export default function StatusEcommerce() {
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-600">
                   <Shield className="w-5 h-5 text-[var(--brand-deep)]" />
-                  <span>Secure checkout with encryption</span>
+                  <span>Preview checkout — no payment taken</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-600">
                   <Package className="w-5 h-5 text-[var(--brand-deep)]" />
@@ -1181,6 +1181,15 @@ export default function StatusEcommerce() {
       handleNavigate('home');
     };
 
+    if (import.meta.env.PROD) {
+      return (
+        <div className="container mx-auto px-4 py-16 max-w-2xl text-center">
+          <h1 className="text-3xl font-bold mb-4">Account login is not available on this preview</h1>
+          <p className="text-gray-600">This website does not create or authenticate customer accounts.</p>
+        </div>
+      );
+    }
+
     if (isUserLoggedIn) {
       const user = getCurrentUser();
       return (
@@ -1526,6 +1535,18 @@ export default function StatusEcommerce() {
   const CheckoutPage = () => {
     const { guest, error, lastOrder, submitting, placeOrderWithGuest } = checkout;
     const { subtotal, shipping, total, lines } = cart;
+
+    if (import.meta.env.PROD) {
+      return (
+        <div className="container mx-auto px-4 py-16 max-w-2xl text-center">
+          <h1 className="text-3xl font-bold mb-4">Checkout is not available on this preview</h1>
+          <p className="text-gray-600 mb-6">This site does not process orders or payments. Please do not enter personal or payment details here.</p>
+          <button onClick={() => handleNavigate('shop')} className="px-8 py-3 bg-[var(--brand-cyan)] text-white rounded-lg">
+            Back to products
+          </button>
+        </div>
+      );
+    }
 
     if (lastOrder) {
       return (

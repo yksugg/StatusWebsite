@@ -3,7 +3,6 @@ export const MOCK_STORAGE_KEYS = {
   cart: 'status_mock_cart_v1',
   orders: 'status_mock_orders_v1',
   productOverrides: 'status_mock_product_overrides_v1',
-  adminSession: 'status_mock_admin_session_v1',
 } as const;
 
 export function readJson<T>(key: string, fallback: T): T {
